@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 null() { case $1 in '') return 0; esac; return 1; }
-sed_cmd='1,20d'; ty=; sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/d'
+sed_cmd='1,/^#_AWK_BEGIN_$/d'; ty=; sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/d'
 case $(awk --version 2>&1 | cat) in
 *'GNU Awk'*) ty=gnu;;
 *BusyBox*) ty=busybox;;
@@ -18,6 +18,8 @@ busybox)
 esac
 od -v -A n -t u1 -- "$1" | awk -v fname="$1" "$(sed "$sed_cmd" "$0")"
 exit $?
+
+#_AWK_BEGIN_
 
 BEGIN {
 #_POSIX_BEGIN_
