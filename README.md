@@ -8,9 +8,9 @@ The original code and ideas are from [md5.awk](https://github.com/kaworu/md5.awk
 
 - [ ] md5sum
   - [x] basic functionality
+  - [x] support input from stdin
   - [ ] optimizition for streaming
   - [ ] support `-c` option
   - [ ] support `--tag` option
-  - [ ] support input from stdin
 - [ ] b3sum
 - [ ] shaXsum

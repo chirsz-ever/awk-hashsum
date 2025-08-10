@@ -10,9 +10,9 @@ streq() {
 }
 
 testmd5() {
-    std_output=$(printf '%s' "$1" | md5sum /dev/stdin | awk '{print $1}')
-    output=$(printf '%s' "$1" | ./md5sum.sh /dev/stdin | awk '{print $1}')
-    posix_output=$(printf '%s' "$1" | POSIXLY_CORRECT=1 ./md5sum.sh /dev/stdin | awk '{print $1}')
+    std_output=$(printf '%s' "$1" | md5sum)
+    output=$(printf '%s' "$1" | ./md5sum.sh)
+    posix_output=$(printf '%s' "$1" | POSIXLY_CORRECT=1 ./md5sum.sh)
 
     if ! streq "$std_output" "$output"; then
         echo "Output mismatch for \"$1\":"
@@ -32,9 +32,9 @@ testmd5() {
 testmd5random() {
     random_data_file=$(mktemp)
     head -c "$1" /dev/urandom > "$random_data_file"
-    std_output=$(md5sum "$random_data_file" | awk '{print $1}')
-    output=$(./md5sum.sh "$random_data_file" | awk '{print $1}')
-    posix_output=$(POSIXLY_CORRECT=1 ./md5sum.sh "$random_data_file" | awk '{print $1}')
+    std_output=$(md5sum "$random_data_file")
+    output=$(./md5sum.sh "$random_data_file")
+    posix_output=$(POSIXLY_CORRECT=1 ./md5sum.sh "$random_data_file")
 
     if [ "$std_output" != "$output" ]; then
         echo "Output mismatch for random data in $random_data_file:"
@@ -51,6 +51,28 @@ testmd5random() {
     fi
 
     rm -f "$random_data_file"
+}
+
+testmd5args() {
+    stdin_content="$1"
+    shift
+    std_output=$(printf '%s' "$stdin_content" | md5sum "$@")
+    output=$(printf '%s' "$stdin_content" | ./md5sum.sh "$@")
+    posix_output=$(printf '%s' "$stdin_content" | POSIXLY_CORRECT=1 ./md5sum.sh "$@")
+
+    if ! streq "$std_output" "$output"; then
+        echo "Output mismatch for \"$1\" with args \"$*\":"
+        echo "md5sum:    $std_output"
+        echo "md5sum.sh: $output"
+        return 1
+    fi
+
+    if ! streq "$std_output" "$posix_output"; then
+        echo "POSIX output mismatch for \"$1\" with args \"$*\":"
+        echo "md5sum:    $std_output"
+        echo "md5sum.sh: $posix_output"
+        return 1
+    fi
 }
 
 cd "$(dirname "$0")" || exit 1
@@ -70,5 +92,8 @@ testmd5random 64
 testmd5random 65
 testmd5random 100
 testmd5random 1000
+testmd5args '' -
+testmd5args 'abc' -
+testmd5args 'abc' - -
 
 echo "All tests passed."

@@ -1,7 +1,34 @@
 #!/bin/sh -e
 
 null() { case $1 in '') return 0; esac; return 1; }
-sed_cmd='1,/^#_AWK_BEGIN_$/d'; ty=; sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/d'
+
+usage() {
+    echo "Usage: $(basename "$0") [FILE]..."
+    echo "Calculate the MD5 checksum of the given files."
+    echo "If no files are given, or argument is -, read from standard input."
+}
+
+# process options
+for arg in "$@"; do
+    case $arg in
+    --help|-h)
+        usage
+        exit 0;;
+    -)
+        continue;;
+    --)
+        break;;
+    -*)
+        echo "Unknown option: $arg" >&2
+        echo "Use --help for usage information." >&2
+        exit 1;;
+    esac
+done
+
+# use built-in bitwise functions if available.
+sed_cmd='1,/^#_AWK_BEGIN_$/d'
+sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/d'
+ty=
 case $(awk --version 2>&1 | cat) in
 *'GNU Awk'*) ty=gnu;;
 *BusyBox*) ty=busybox;;
@@ -16,9 +43,41 @@ busybox)
     # BusyBox awk always uses built-in bitwise functions.
     sed_cmd=$sed_cmd\;$sed_cmd_buitin_bitwise
 esac
-od -v -A n -t u1 -- "$1" | awk -v fname="$1" "$(sed "$sed_cmd" "$0")"
+
+awk_script="$(sed "$sed_cmd" "$0")"
+run_once_on() {
+    if [ "$1" != '-' ] && [ ! -r "$1" ]; then
+        echo "Cannot read file: $1" >&2
+        exit 1
+    fi
+    od -v -A n -t u1 -- "$1" | awk -v fname="$1" "$awk_script"
+}
+
+# if no arguments, read from stdin
+case $# in 0)
+    set -- -
+esac
+
+options_end=
+for arg do
+    case $options_end in
+    1)
+        run_once_on "$arg"
+        continue
+    esac
+
+    case $arg in
+    -)  run_once_on -;;
+    --) options_end=1;;
+    -*) continue;;
+    *)  run_once_on "$arg";;
+    esac
+done
 exit $?
 
+# a trick to suppress shellcheck warnings.
+# shellcheck disable=SC2317
+: <<'#_AWK_END_'
 #_AWK_BEGIN_
 
 BEGIN {
@@ -286,3 +345,4 @@ function _bitwise_init(    a, b, x, y, i) {
 }
 
 #_POSIX_END_
+#_AWK_END_
