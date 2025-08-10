@@ -10,7 +10,7 @@ The original code and ideas are from [md5.awk](https://github.com/kaworu/md5.awk
   - [x] basic functionality
   - [x] support input from stdin
   - [x] support `--tag` option
-  - [ ] optimizition for streaming
+  - [x] optimizition for streaming
   - [ ] support `-c` option
 - [ ] b3sum
 - [ ] shaXsum
