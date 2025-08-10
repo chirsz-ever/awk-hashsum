@@ -61,14 +61,14 @@ testmd5args() {
     posix_output=$(printf '%s' "$stdin_content" | POSIXLY_CORRECT=1 ./md5sum.sh "$@")
 
     if ! streq "$std_output" "$output"; then
-        echo "Output mismatch for \"$1\" with args \"$*\":"
+        echo "Output mismatch for \"$stdin_content\" with args \"$*\":"
         echo "md5sum:    $std_output"
         echo "md5sum.sh: $output"
         return 1
     fi
 
     if ! streq "$std_output" "$posix_output"; then
-        echo "POSIX output mismatch for \"$1\" with args \"$*\":"
+        echo "POSIX output mismatch for \"$stdin_content\" with args \"$*\":"
         echo "md5sum:    $std_output"
         echo "md5sum.sh: $posix_output"
         return 1
@@ -95,5 +95,8 @@ testmd5random 1000
 testmd5args '' -
 testmd5args 'abc' -
 testmd5args 'abc' - -
+testmd5args 'abc' --tag
+testmd5args 'abc' --tag -
+testmd5args 'abc' --tag - -
 
 echo "All tests passed."

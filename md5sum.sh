@@ -9,15 +9,16 @@ usage() {
 }
 
 # process options
+bsd_foramt=0
 for arg in "$@"; do
     case $arg in
+    -)  continue;;
+    --) break;;
     --help|-h)
         usage
         exit 0;;
-    -)
-        continue;;
-    --)
-        break;;
+    --tag)
+        bsd_foramt=1;;
     -*)
         echo "Unknown option: $arg" >&2
         echo "Use --help for usage information." >&2
@@ -45,18 +46,15 @@ busybox)
 esac
 
 awk_script="$(sed "$sed_cmd" "$0")"
+run_once=
 run_once_on() {
     if [ "$1" != '-' ] && [ ! -r "$1" ]; then
         echo "Cannot read file: $1" >&2
         exit 1
     fi
-    od -v -A n -t u1 -- "$1" | awk -v fname="$1" "$awk_script"
+    od -v -A n -t u1 -- "$1" | awk -v fname="$1" -v bsd_foramt="$bsd_foramt" "$awk_script"
+    run_once=1
 }
-
-# if no arguments, read from stdin
-case $# in 0)
-    set -- -
-esac
 
 options_end=
 for arg do
@@ -73,6 +71,10 @@ for arg do
     *)  run_once_on "$arg";;
     esac
 done
+case $run_once in '')
+    # no files given, read from stdin.
+    run_once_on -
+esac
 exit $?
 
 # a trick to suppress shellcheck warnings.
@@ -95,7 +97,11 @@ BEGIN {
 END {
     # go over all the files in-order.
     # a-la `openssl md5' output.
-    printf("%s  %s\n", md5(content_bytes, bytes_count), fname);
+    if (bsd_foramt) {
+        printf("MD5 (%s) = %s\n", fname, md5(content_bytes, bytes_count));
+    } else {
+        printf("%s  %s\n", md5(content_bytes, bytes_count), fname);
+    }
 }
 
 # our md5 implementation
