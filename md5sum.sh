@@ -3,7 +3,7 @@
 null() { case $1 in '') return 0; esac; return 1; }
 
 usage() {
-    echo "Usage: $(basename "$0") [FILE]..."
+    echo "Usage: $(basename "$0") [--tag] [FILE]..."
     echo "Calculate the MD5 checksum of the given files."
     echo "If no files are given, or argument is -, read from standard input."
 }
