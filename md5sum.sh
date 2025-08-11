@@ -52,7 +52,11 @@ run_once_on() {
         echo "Cannot read file: $1" >&2
         exit 1
     fi
-    od -v -A n -t u1 -- "$1" | awk -v fname="$1" -v bsd_foramt="$bsd_foramt" "$awk_script"
+    case $1 in -)
+        od -v -A n -t u1 | awk -v fname="$1" -v bsd_foramt="$bsd_foramt" "$awk_script";;
+    *)
+        od -v -A n -t u1 -- "$1" | awk -v fname="$1" -v bsd_foramt="$bsd_foramt" "$awk_script";;
+    esac
     run_once=1
 }
 
