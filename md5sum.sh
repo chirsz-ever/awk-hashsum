@@ -27,8 +27,8 @@ for arg in "$@"; do
 done
 
 # use built-in bitwise functions if available.
-sed_cmd='1,/^#_AWK_BEGIN_$/d'
-sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/d'
+sed_cmd='1,/^#_AWK_BEGIN_$/s/^.*$//'
+sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/s/^.*$//'
 ty=
 case $(awk --version 2>&1 | cat) in
 *'GNU Awk'*) ty=gnu;;
