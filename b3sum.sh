@@ -51,6 +51,10 @@ esac
 # use built-in bitwise functions if available.
 sed_cmd='1,/^#_AWK_BEGIN_$/s/^.*$//'
 sed_cmd_buitin_bitwise='/^#_POSIX_BEGIN_$/,/^#_POSIX_END_$/s/^.*$//'
+null "${DEBUG-}" && {
+    sed_cmd_debug='/^#_DEBUG_BEGIN_$/,/^#_DEBUG_END_$/s/^.*$//'
+    sed_cmd=$sed_cmd\;$sed_cmd_debug
+}
 ty=
 case $(awk --version 2>&1 | cat) in
 *'GNU Awk'*) ty=gnu;;
@@ -269,20 +273,20 @@ function compress(result, h, m, t, b, d, extend,  v, i) {
     v[14] = b;
     v[15] = d;
 
-    if (ENVIRON["DEBUG"]) {
-        printf("compress: t=%d, b=%d, d=%02x\n", t, b, d);
-        printf("  h:\n  ");
-        for (i = 0; i < 8; ++i) {
-            printf("%08x ", h[i]);
-            if (i == 7) printf("\n");
-        }
-        printf("  m:\n  ");
-        for (i = 0; i < 16; ++i) {
-            printf("%08x ", m[i]);
-            if (i == 7) printf("\n  ");
-            if (i == 15) printf("\n");
-        }
+#_DEBUG_BEGIN_
+    printf("compress: t=%d, b=%d, d=%02x\n", t, b, d);
+    printf("  h:\n  ");
+    for (i = 0; i < 8; ++i) {
+        printf("%08x ", h[i]);
+        if (i == 7) printf("\n");
     }
+    printf("  m:\n  ");
+    for (i = 0; i < 16; ++i) {
+        printf("%08x ", m[i]);
+        if (i == 7) printf("\n  ");
+        if (i == 15) printf("\n");
+    }
+#_DEBUG_END_
 
     round_(m, v);
     permute(m);
