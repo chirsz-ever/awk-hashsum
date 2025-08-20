@@ -6,11 +6,11 @@ The original code and ideas are from [md5.awk](https://github.com/kaworu/md5.awk
 
 ## TODO
 
-- [ ] md5sum
+- [x] md5sum
   - [x] basic functionality
   - [x] support input from stdin
   - [x] support `--tag` option
   - [x] optimizition for streaming
-  - [ ] support `-c` option
-- [ ] b3sum
+- [x] b3sum
+- [ ] support `-c` option
 - [ ] shaXsum
